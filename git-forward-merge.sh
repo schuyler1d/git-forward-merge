@@ -12,11 +12,6 @@
 # Enter `git forward-merge`. All pushes done with it work regardless of which
 # branch is currently checked out and which files are in the working tree.
 
-dashless=$(basename "$0" | sed -e 's/-/ /')
-USAGE="list [<options>]
-    or: $dashless <source_branch> <destination_branch>
-    or: $dashless <destination_branch>"
-
 # Push branch `foo` into `bar`:
 
 #     git forward-merge foo bar
@@ -50,6 +45,11 @@ USAGE="list [<options>]
 # Future TODOs
 # maybe have a switch so that if there is a conflict you would keep the dir
 # and then have another switch to say 'use this dir for the conflict resolutions'
+
+dashless=$(basename "$0" | sed -e 's/-/ /')
+USAGE="list [<options>]
+    or: $dashless <source_branch> <destination_branch>
+    or: $dashless <destination_branch>"
 
 . $(git --exec-path)/git-sh-setup
 
@@ -99,23 +99,13 @@ else
         GIT_WORK_TREE="$tmp_work_tree"
         export GIT_INDEX_FILE GIT_WORK_TREE
 
-        echo $merge_base
-        echo $GIT_WORK_TREE
-        echo $GIT_DIR
-
         git read-tree -im "$merge_base" "$destination" "$source"
-
-        echo git read-tree -im "$merge_base" "$destination" "$source"
-        echo after read-tree
-        echo $(git rev-parse --is-bare-repository)
-        git merge-index echo -a
 
         git merge-index git-merge-one-file -a
         write_tree=$(git write-tree)
 
         commit=$(git commit-tree "$write_tree" \
             -p "$destination" -p "$source" -m "Merge $source_nice into $destination")
-        echo $commit
         git update-ref -m "Merge $source_nice into $destination" "refs/heads/$destination" "$commit"
 
         #restore environment
