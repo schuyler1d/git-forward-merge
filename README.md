@@ -47,6 +47,6 @@ will leave the merge in the working directory for you to resolve the conflict
 and commit, just like `git merge`.
 
 Future TODOs
-maybe have a switch so that if there is a conflict you would keep the dir
+* maybe have a switch so that if there is a conflict you would keep the dir
 and then have another switch to say 'use this dir for the conflict resolutions'
-
+* merge switches: -m, merge strategies?

@@ -55,6 +55,8 @@ USAGE="list [<options>]
 
 currentbranch=$(git rev-parse --abbrev-ref HEAD)
 
+EXITCODE=0
+
 if test "$#" = "1"
 then
     source="HEAD"
@@ -100,14 +102,30 @@ else
         export GIT_INDEX_FILE GIT_WORK_TREE
 
         git read-tree -im "$merge_base" "$destination" "$source"
+	res=$?
+	if test $res != 0
+	then
+	    echo 'CONFLICT (read-tree) on merge'
+	    EXITCODE=1
+	else
+            git merge-index -o -q git-merge-one-file -a >&2
+	    res=$?
+	    if test $res != 0
+	    then
+		echo 'CONFLICT (merge-index) on merge'
+		EXITCODE=1
+	    else
+		write_tree=$(git write-tree)
+	    
+		commit=$(git commit-tree "$write_tree" \
+		    -p "$destination" \
+		    -p "$source" \
+		    -m "Merge $source_nice into $destination")
+		git update-ref -m "Merge $source_nice into $destination" \
+		    "refs/heads/$destination" "$commit"
+	    fi
 
-        git merge-index git-merge-one-file -a
-        write_tree=$(git write-tree)
-
-        commit=$(git commit-tree "$write_tree" \
-            -p "$destination" -p "$source" -m "Merge $source_nice into $destination")
-        git update-ref -m "Merge $source_nice into $destination" "refs/heads/$destination" "$commit"
-
+	fi
         #restore environment
         unset GIT_WORK_TREE GIT_INDEX_FILE
         test -z "$ORIG_GIT_WORK_TREE" || {
@@ -125,3 +143,5 @@ else
         echo "$destination is already ahead of $source, no need to merge."
     fi
 fi
+
+exit $EXITCODE
