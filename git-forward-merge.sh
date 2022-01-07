@@ -74,7 +74,7 @@ fi
 
 if test "$destination" = "$currentbranch"
 then
-    git merge $source
+    exec git merge $source
 else
     firstcommit=$(git merge-base "$source" "$source")
     secondcommit=$(git merge-base "$destination" "$destination")
