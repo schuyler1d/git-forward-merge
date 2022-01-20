@@ -51,7 +51,7 @@ USAGE="list [<options>]
     or: $dashless <source_branch> <destination_branch>
     or: $dashless <destination_branch>"
 
-. $(git --exec-path)/git-sh-setup
+. "$(git --exec-path)/git-sh-setup"
 
 currentbranch=$(git rev-parse --abbrev-ref HEAD)
 
